@@ -1,8 +1,10 @@
 import { RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { BeamingQuestionView } from './components/Rhythm/BeamingQuestion';
 import { RestQuestionView } from './components/Rhythm/RestQuestion';
 import { RhythmQuestionView } from './components/Rhythm/RhythmQuestion';
+import { useBeamingQuestion } from './hooks/useBeamingQuestion';
 import { useRestQuestion } from './hooks/useRestQuestion';
 import { useRhythmQuestion } from './hooks/useRhythmQuestion';
 import type { TimeSignatureId } from './utils/music-logic/rhythmGenerator';
@@ -13,21 +15,23 @@ const PROJECT_STRUCTURE = [
   '    Rhythm/',
   '      RhythmQuestion.tsx',
   '      RestQuestion.tsx',
+  '      BeamingQuestion.tsx',
   '  hooks/',
   '    useRhythmQuestion.ts',
   '    useRestQuestion.ts',
+  '    useBeamingQuestion.ts',
   '  utils/',
   '    music-logic/',
   '      rhythmGenerator.ts',
   '      restGenerator.ts',
+  '      beamingQuestionGenerator.ts',
   '  App.tsx',
   '  main.tsx',
   '  styles/index.css',
 ] as const;
 
-type SectionMode = '1.1' | '1.2' | 'mixed';
-
-type QuestionKind = 'time-signature' | 'rest';
+type SectionMode = '1.1' | '1.2' | '1.3' | 'mixed';
+type QuestionKind = 'time-signature' | 'rest' | 'beaming';
 
 function RhythmPage(): JSX.Element {
   const [mode, setMode] = useState<SectionMode>('1.1');
@@ -35,36 +39,40 @@ function RhythmPage(): JSX.Element {
 
   const rhythm = useRhythmQuestion();
   const rest = useRestQuestion();
+  const beaming = useBeamingQuestion();
 
-  const activeType = mode === 'mixed' ? mixedType : mode === '1.1' ? 'time-signature' : 'rest';
+  const activeType: QuestionKind = mode === 'mixed' ? mixedType : mode === '1.1' ? 'time-signature' : mode === '1.2' ? 'rest' : 'beaming';
 
   const randomizeMixed = () => {
-    setMixedType(Math.random() > 0.5 ? 'time-signature' : 'rest');
+    const pool: QuestionKind[] = ['time-signature', 'rest', 'beaming'];
+    setMixedType(pool[Math.floor(Math.random() * pool.length)]);
   };
 
   const onNextQuestion = () => {
-    if (activeType === 'time-signature') {
-      rhythm.nextQuestion();
-    } else {
-      rest.nextQuestion();
-    }
+    if (activeType === 'time-signature') rhythm.nextQuestion();
+    if (activeType === 'rest') rest.nextQuestion();
+    if (activeType === 'beaming') beaming.nextQuestion();
 
-    if (mode === 'mixed') {
-      randomizeMixed();
-    }
+    if (mode === 'mixed') randomizeMixed();
   };
 
   const onSubmit = () => {
-    if (activeType === 'time-signature') {
-      rhythm.submit();
-    } else {
-      rest.submit();
-    }
+    if (activeType === 'time-signature') rhythm.submit();
+    if (activeType === 'rest') rest.submit();
+    if (activeType === 'beaming') beaming.submit();
   };
 
-  const activeSubmitted = activeType === 'time-signature' ? rhythm.isSubmitted : rest.isSubmitted;
-  const activeCorrect = activeType === 'time-signature' ? rhythm.isCorrect : rest.isCorrect;
-  const canSubmit = activeType === 'time-signature' ? !!rhythm.selectedChoice : !!rest.selectedOptionId;
+  const activeSubmitted =
+    activeType === 'time-signature' ? rhythm.isSubmitted : activeType === 'rest' ? rest.isSubmitted : beaming.isSubmitted;
+
+  const activeCorrect = activeType === 'time-signature' ? rhythm.isCorrect : activeType === 'rest' ? rest.isCorrect : beaming.isCorrect;
+
+  const canSubmit =
+    activeType === 'time-signature'
+      ? !!rhythm.selectedChoice
+      : activeType === 'rest'
+        ? !!rest.selectedOptionId
+        : !!beaming.selectedOptionId;
 
   const selectedRestOption = useMemo(
     () => rest.question.options.find((option) => option.id === rest.selectedOptionId) ?? null,
@@ -86,11 +94,18 @@ function RhythmPage(): JSX.Element {
     return 'border-stone-300 bg-white text-stone-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-400';
   };
 
+  const activeExplanation =
+    activeType === 'time-signature'
+      ? rhythm.question.explanation
+      : activeType === 'rest'
+        ? rest.question.explanation
+        : beaming.question.explanation;
+
   return (
-    <main className="mx-auto min-h-screen max-w-5xl space-y-6 px-4 py-8 text-stone-800 dark:text-stone-100 md:px-6">
+    <main className="mx-auto min-h-screen max-w-6xl space-y-6 px-4 py-8 text-stone-800 dark:text-stone-100 md:px-6">
       <header className="space-y-2 border-b border-stone-300 pb-4 dark:border-stone-700">
         <h1 className="text-3xl font-bold tracking-tight">ABRSM 五級樂理｜節奏無限題庫</h1>
-        <p className="text-sm text-stone-600 dark:text-stone-300">單元 1：Rhythm（1.1 辨識拍號、1.2 填補休止符）</p>
+        <p className="text-sm text-stone-600 dark:text-stone-300">單元 1：Rhythm（1.1 辨識拍號、1.2 填補休止符、1.3 音符組合與連尾規則）</p>
       </header>
 
       <section className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
@@ -103,6 +118,7 @@ function RhythmPage(): JSX.Element {
           {([
             ['1.1', '1.1 辨識拍號'],
             ['1.2', '1.2 填補休止符'],
+            ['1.3', '1.3 連尾規則'],
             ['mixed', '隨機混合'],
           ] as const).map(([id, label]) => (
             <button
@@ -123,7 +139,7 @@ function RhythmPage(): JSX.Element {
           ))}
         </div>
 
-        {activeType === 'time-signature' ? (
+        {activeType === 'time-signature' && (
           <>
             <h2 className="text-lg font-semibold">題目 1.1：請圈選正確拍號</h2>
             <RhythmQuestionView question={rhythm.question} />
@@ -140,7 +156,9 @@ function RhythmPage(): JSX.Element {
               ))}
             </div>
           </>
-        ) : (
+        )}
+
+        {activeType === 'rest' && (
           <>
             <h2 className="text-lg font-semibold">題目 1.2：填補休止符</h2>
             <RestQuestionView question={rest.question} selectedOption={selectedRestOption} />
@@ -172,6 +190,18 @@ function RhythmPage(): JSX.Element {
           </>
         )}
 
+        {activeType === 'beaming' && (
+          <>
+            <h2 className="text-lg font-semibold">題目 1.3：音符組合與連尾規則</h2>
+            <BeamingQuestionView
+              question={beaming.question}
+              selectedOptionId={beaming.selectedOptionId}
+              onSelect={beaming.setSelectedOptionId}
+              isSubmitted={beaming.isSubmitted}
+            />
+          </>
+        )}
+
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
@@ -200,7 +230,7 @@ function RhythmPage(): JSX.Element {
             }`}
           >
             <p className="font-semibold">{activeCorrect ? '答對了！' : '答錯了，請看解析：'}</p>
-            <p>{activeType === 'time-signature' ? rhythm.question.explanation : rest.question.explanation}</p>
+            <p>{activeExplanation}</p>
           </div>
         )}
       </section>
