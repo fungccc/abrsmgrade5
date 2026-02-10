@@ -1,37 +1,42 @@
 import { RefreshCw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { AdvancedBeamingQuestionView } from './components/Rhythm/AdvancedBeamingQuestion';
 import { BeamingQuestionView } from './components/Rhythm/BeamingQuestion';
+import { RestAuditQuestionView } from './components/Rhythm/RestAuditQuestion';
 import { RestQuestionView } from './components/Rhythm/RestQuestion';
 import { RhythmQuestionView } from './components/Rhythm/RhythmQuestion';
+import { useAdvancedBeamingQuestion } from './hooks/useAdvancedBeamingQuestion';
 import { useBeamingQuestion } from './hooks/useBeamingQuestion';
+import { useRestAuditQuestion } from './hooks/useRestAuditQuestion';
 import { useRestQuestion } from './hooks/useRestQuestion';
 import { useRhythmQuestion } from './hooks/useRhythmQuestion';
 import type { TimeSignatureId } from './utils/music-logic/rhythmGenerator';
 
 const PROJECT_STRUCTURE = [
   'src/',
-  '  components/',
-  '    Rhythm/',
-  '      RhythmQuestion.tsx',
-  '      RestQuestion.tsx',
-  '      BeamingQuestion.tsx',
+  '  components/Rhythm/',
+  '    RhythmQuestion.tsx',
+  '    RestQuestion.tsx',
+  '    BeamingQuestion.tsx',
+  '    AdvancedBeamingQuestion.tsx',
+  '    RestAuditQuestion.tsx',
   '  hooks/',
   '    useRhythmQuestion.ts',
   '    useRestQuestion.ts',
   '    useBeamingQuestion.ts',
-  '  utils/',
-  '    music-logic/',
-  '      rhythmGenerator.ts',
-  '      restGenerator.ts',
-  '      beamingQuestionGenerator.ts',
-  '  App.tsx',
-  '  main.tsx',
-  '  styles/index.css',
+  '    useAdvancedBeamingQuestion.ts',
+  '    useRestAuditQuestion.ts',
+  '  utils/music-logic/',
+  '    rhythmGenerator.ts',
+  '    restGenerator.ts',
+  '    beamingQuestionGenerator.ts',
+  '    advancedBeamingGenerator.ts',
+  '    restAuditGenerator.ts',
 ] as const;
 
-type SectionMode = '1.1' | '1.2' | '1.3' | 'mixed';
-type QuestionKind = 'time-signature' | 'rest' | 'beaming';
+type SectionMode = '1.1' | '1.2' | '1.3' | '1.4' | '1.5' | 'mixed';
+type QuestionKind = 'time-signature' | 'rest' | 'beaming' | 'advanced-beaming' | 'rest-audit';
 
 function RhythmPage(): JSX.Element {
   const [mode, setMode] = useState<SectionMode>('1.1');
@@ -40,11 +45,24 @@ function RhythmPage(): JSX.Element {
   const rhythm = useRhythmQuestion();
   const rest = useRestQuestion();
   const beaming = useBeamingQuestion();
+  const advancedBeaming = useAdvancedBeamingQuestion();
+  const restAudit = useRestAuditQuestion();
 
-  const activeType: QuestionKind = mode === 'mixed' ? mixedType : mode === '1.1' ? 'time-signature' : mode === '1.2' ? 'rest' : 'beaming';
+  const activeType: QuestionKind =
+    mode === 'mixed'
+      ? mixedType
+      : mode === '1.1'
+        ? 'time-signature'
+        : mode === '1.2'
+          ? 'rest'
+          : mode === '1.3'
+            ? 'beaming'
+            : mode === '1.4'
+              ? 'advanced-beaming'
+              : 'rest-audit';
 
   const randomizeMixed = () => {
-    const pool: QuestionKind[] = ['time-signature', 'rest', 'beaming'];
+    const pool: QuestionKind[] = ['time-signature', 'rest', 'beaming', 'advanced-beaming', 'rest-audit'];
     setMixedType(pool[Math.floor(Math.random() * pool.length)]);
   };
 
@@ -52,7 +70,8 @@ function RhythmPage(): JSX.Element {
     if (activeType === 'time-signature') rhythm.nextQuestion();
     if (activeType === 'rest') rest.nextQuestion();
     if (activeType === 'beaming') beaming.nextQuestion();
-
+    if (activeType === 'advanced-beaming') advancedBeaming.nextQuestion();
+    if (activeType === 'rest-audit') restAudit.nextQuestion();
     if (mode === 'mixed') randomizeMixed();
   };
 
@@ -60,19 +79,42 @@ function RhythmPage(): JSX.Element {
     if (activeType === 'time-signature') rhythm.submit();
     if (activeType === 'rest') rest.submit();
     if (activeType === 'beaming') beaming.submit();
+    if (activeType === 'advanced-beaming') advancedBeaming.submit();
+    if (activeType === 'rest-audit') restAudit.submit();
   };
 
   const activeSubmitted =
-    activeType === 'time-signature' ? rhythm.isSubmitted : activeType === 'rest' ? rest.isSubmitted : beaming.isSubmitted;
+    activeType === 'time-signature'
+      ? rhythm.isSubmitted
+      : activeType === 'rest'
+        ? rest.isSubmitted
+        : activeType === 'beaming'
+          ? beaming.isSubmitted
+          : activeType === 'advanced-beaming'
+            ? advancedBeaming.isSubmitted
+            : restAudit.isSubmitted;
 
-  const activeCorrect = activeType === 'time-signature' ? rhythm.isCorrect : activeType === 'rest' ? rest.isCorrect : beaming.isCorrect;
+  const activeCorrect =
+    activeType === 'time-signature'
+      ? rhythm.isCorrect
+      : activeType === 'rest'
+        ? rest.isCorrect
+        : activeType === 'beaming'
+          ? beaming.isCorrect
+          : activeType === 'advanced-beaming'
+            ? advancedBeaming.isCorrect
+            : restAudit.isCorrect;
 
   const canSubmit =
     activeType === 'time-signature'
       ? !!rhythm.selectedChoice
       : activeType === 'rest'
         ? !!rest.selectedOptionId
-        : !!beaming.selectedOptionId;
+        : activeType === 'beaming'
+          ? !!beaming.selectedOptionId
+          : activeType === 'advanced-beaming'
+            ? !!advancedBeaming.selectedOptionId
+            : restAudit.selectedJudgement !== null;
 
   const selectedRestOption = useMemo(
     () => rest.question.options.find((option) => option.id === rest.selectedOptionId) ?? null,
@@ -99,13 +141,17 @@ function RhythmPage(): JSX.Element {
       ? rhythm.question.explanation
       : activeType === 'rest'
         ? rest.question.explanation
-        : beaming.question.explanation;
+        : activeType === 'beaming'
+          ? beaming.question.explanation
+          : activeType === 'advanced-beaming'
+            ? advancedBeaming.question.explanation
+            : restAudit.question.explanation;
 
   return (
     <main className="mx-auto min-h-screen max-w-6xl space-y-6 px-4 py-8 text-stone-800 dark:text-stone-100 md:px-6">
       <header className="space-y-2 border-b border-stone-300 pb-4 dark:border-stone-700">
         <h1 className="text-3xl font-bold tracking-tight">ABRSM 五級樂理｜節奏無限題庫</h1>
-        <p className="text-sm text-stone-600 dark:text-stone-300">單元 1：Rhythm（1.1 辨識拍號、1.2 填補休止符、1.3 音符組合與連尾規則）</p>
+        <p className="text-sm text-stone-600 dark:text-stone-300">單元 1：Rhythm（1.1～1.5 全題型）</p>
       </header>
 
       <section className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
@@ -119,6 +165,8 @@ function RhythmPage(): JSX.Element {
             ['1.1', '1.1 辨識拍號'],
             ['1.2', '1.2 填補休止符'],
             ['1.3', '1.3 連尾規則'],
+            ['1.4', '1.4 進階音符組合'],
+            ['1.5', '1.5 休止符改錯'],
             ['mixed', '隨機混合'],
           ] as const).map(([id, label]) => (
             <button
@@ -202,6 +250,30 @@ function RhythmPage(): JSX.Element {
           </>
         )}
 
+        {activeType === 'advanced-beaming' && (
+          <>
+            <h2 className="text-lg font-semibold">題目 1.4：進階音符組合（Compound & Irregular Beaming）</h2>
+            <AdvancedBeamingQuestionView
+              question={advancedBeaming.question}
+              selectedOptionId={advancedBeaming.selectedOptionId}
+              onSelect={advancedBeaming.setSelectedOptionId}
+              isSubmitted={advancedBeaming.isSubmitted}
+            />
+          </>
+        )}
+
+        {activeType === 'rest-audit' && (
+          <>
+            <h2 className="text-lg font-semibold">題目 1.5：休止符改錯（Rest Audit）</h2>
+            <RestAuditQuestionView
+              question={restAudit.question}
+              selectedJudgement={restAudit.selectedJudgement}
+              onSelectJudgement={restAudit.setSelectedJudgement}
+              isSubmitted={restAudit.isSubmitted}
+            />
+          </>
+        )}
+
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
@@ -221,7 +293,7 @@ function RhythmPage(): JSX.Element {
           </button>
         </div>
 
-        {activeSubmitted && (
+        {activeSubmitted && activeType !== 'rest-audit' && (
           <div
             className={`rounded-lg border p-4 text-sm leading-7 ${
               activeCorrect
