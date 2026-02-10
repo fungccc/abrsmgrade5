@@ -9,6 +9,7 @@ import { RhythmQuestionView } from './components/Rhythm/RhythmQuestion';
 import { PitchSection } from './components/Pitch/PitchSection';
 import { KeysAndScalesSection } from './components/KeysAndScales/KeysAndScalesSection';
 import { IntervalsSection } from './components/Intervals/IntervalsSection';
+import { ChordsSection } from './components/Chords/ChordsSection';
 import { useAdvancedBeamingQuestion } from './hooks/useAdvancedBeamingQuestion';
 import { useBeamingQuestion } from './hooks/useBeamingQuestion';
 import { useRestAuditQuestion } from './hooks/useRestAuditQuestion';
@@ -18,7 +19,7 @@ import type { TimeSignatureId } from './utils/music-logic/rhythmGenerator';
 
 type SectionMode = '1.1' | '1.2' | '1.3' | '1.4' | '1.5' | 'mixed';
 type QuestionKind = 'time-signature' | 'rest' | 'beaming' | 'advanced-beaming' | 'rest-audit';
-type Chapter = 'rhythm' | 'pitch' | 'keys' | 'intervals';
+type Chapter = 'rhythm' | 'pitch' | 'keys' | 'intervals' | 'chords';
 
 function RhythmSection(): JSX.Element {
   const [mode, setMode] = useState<SectionMode>('1.1');
@@ -225,7 +226,7 @@ function HomePage(): JSX.Element {
     <main className="mx-auto min-h-screen max-w-6xl space-y-6 px-4 py-8 text-stone-800 dark:text-stone-100 md:px-6">
       <header className="space-y-2 border-b border-stone-300 pb-4 dark:border-stone-700">
         <h1 className="text-3xl font-bold tracking-tight">ABRSM 五級樂理｜Infinite Question Generator</h1>
-        <p className="text-sm text-stone-600 dark:text-stone-300">Section 1 Rhythm / Section 2 Pitch / Section 3 Keys and Scales / Section 4 Intervals</p>
+        <p className="text-sm text-stone-600 dark:text-stone-300">Section 1 Rhythm / Section 2 Pitch / Section 3 Keys and Scales / Section 4 Intervals / Section 5 Chords</p>
       </header>
 
       <div className="flex gap-2">
@@ -241,9 +242,12 @@ function HomePage(): JSX.Element {
         <button type="button" onClick={() => setChapter('intervals')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'intervals' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
           Section 4: Intervals
         </button>
+        <button type="button" onClick={() => setChapter('chords')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'chords' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
+          Section 5: Chords
+        </button>
       </div>
 
-      {chapter === 'rhythm' ? <RhythmSection /> : chapter === 'pitch' ? <PitchSection /> : chapter === 'keys' ? <KeysAndScalesSection /> : <IntervalsSection />}
+      {chapter === 'rhythm' ? <RhythmSection /> : chapter === 'pitch' ? <PitchSection /> : chapter === 'keys' ? <KeysAndScalesSection /> : chapter === 'intervals' ? <IntervalsSection /> : <ChordsSection />}
     </main>
   );
 }
