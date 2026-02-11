@@ -17,6 +17,7 @@ import { useRestQuestion } from './hooks/useRestQuestion';
 import { useRhythmQuestion } from './hooks/useRhythmQuestion';
 import { MusicInContextSection } from './components/MusicInContext/MusicInContextSection';
 import { MusicLanguageSection } from './components/MusicLanguageSection';
+import { SectionErrorBoundary } from './components/common/SectionErrorBoundary';
 import type { TimeSignatureId } from './utils/music-logic/rhythmGenerator';
 
 type SectionMode = '1.1' | '1.2' | '1.3' | '1.4' | '1.5' | 'mixed';
@@ -221,6 +222,17 @@ function RhythmSection(): JSX.Element {
   );
 }
 
+
+function getChapterTitle(chapter: Chapter): string {
+  if (chapter === 'rhythm') return 'Section 1: Rhythm';
+  if (chapter === 'pitch') return 'Section 2: Pitch';
+  if (chapter === 'keys') return 'Section 3: Keys & Scales';
+  if (chapter === 'intervals') return 'Section 4: Intervals';
+  if (chapter === 'chords') return 'Section 5: Chords';
+  if (chapter === 'language') return 'Section 6: Terms, Signs, Instruments';
+  return 'Section 7: Music in Context';
+}
+
 function HomePage(): JSX.Element {
   const [chapter, setChapter] = useState<Chapter>('rhythm');
 
@@ -255,7 +267,9 @@ function HomePage(): JSX.Element {
         </button>
       </div>
 
-      {chapter === 'rhythm' ? <RhythmSection /> : chapter === 'pitch' ? <PitchSection /> : chapter === 'keys' ? <KeysAndScalesSection /> : chapter === 'intervals' ? <IntervalsSection /> : chapter === 'chords' ? <ChordsSection /> : chapter === 'language' ? <MusicLanguageSection /> : <MusicInContextSection />}
+      <SectionErrorBoundary key={chapter} sectionName={getChapterTitle(chapter)}>
+        {chapter === 'rhythm' ? <RhythmSection /> : chapter === 'pitch' ? <PitchSection /> : chapter === 'keys' ? <KeysAndScalesSection /> : chapter === 'intervals' ? <IntervalsSection /> : chapter === 'chords' ? <ChordsSection /> : chapter === 'language' ? <MusicLanguageSection /> : <MusicInContextSection />}
+      </SectionErrorBoundary>
     </main>
   );
 }
