@@ -46,7 +46,7 @@ export function RhythmQuestionView({ question }: RhythmQuestionProps): JSX.Eleme
       const voice = new Voice({
         num_beats: beats,
         beat_value: beatValue,
-      });
+      }).setMode(Voice.Mode.SOFT);
       voice.addTickables(staveNotes);
 
       new Formatter().joinVoices([voice]).format([voice], 560);

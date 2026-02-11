@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Beam, Formatter, Renderer, Stave, StaveNote, Voice } from 'vexflow';
 import type { BeamingQuestion } from '../../utils/music-logic/beamingQuestionGenerator';
 
@@ -51,6 +51,7 @@ function OptionCard({
   onClick,
 }: OptionCardProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -58,39 +59,45 @@ function OptionCard({
 
     // Ensure no stale SVG/canvas from previous question remains.
     container.innerHTML = '';
+    setErrorMessage(null);
 
-    const renderer = new Renderer(container, Renderer.Backends.SVG);
-    renderer.resize(330, 160);
+    try {
+      const renderer = new Renderer(container, Renderer.Backends.SVG);
+      renderer.resize(330, 160);
 
-    const context = renderer.getContext();
-    const stave = new Stave(12, 36, 304);
-    stave.addClef('treble').addTimeSignature(timeSignature);
-    stave.setContext(context).draw();
+      const context = renderer.getContext();
+      const stave = new Stave(12, 36, 304);
+      stave.addClef('treble').addTimeSignature(timeSignature);
+      stave.setContext(context).draw();
 
-    const notes = durations.map(
-      (duration) =>
-        new StaveNote({
-          keys: ['b/4'],
-          duration,
-          clef: 'treble',
-        }),
-    );
+      const notes = durations.map(
+        (duration) =>
+          new StaveNote({
+            keys: ['b/4'],
+            duration,
+            clef: 'treble',
+          }),
+      );
 
-    const [beats, beatValue] = timeSignature.split('/').map(Number);
-    const voice = new Voice({ num_beats: beats, beat_value: beatValue });
-    voice.addTickables(notes);
+      const [beats, beatValue] = timeSignature.split('/').map(Number);
+      const voice = new Voice({ num_beats: beats, beat_value: beatValue }).setMode(Voice.Mode.SOFT);
+      voice.addTickables(notes);
 
-    new Formatter().joinVoices([voice]).format([voice], 240);
-    voice.draw(context, stave);
+      new Formatter().joinVoices([voice]).format([voice], 240);
+      voice.draw(context, stave);
 
-    // Manual beam control (no AutoBeam):
-    // We convert each index group from logic into a Beam instance explicitly.
-    beamGroups.forEach((group) => {
-      const beamNotes = group.map((idx) => notes[idx]).filter(Boolean);
-      if (beamNotes.length > 1) {
-        new Beam(beamNotes).setContext(context).draw();
-      }
-    });
+      // Manual beam control (no AutoBeam):
+      // We convert each index group from logic into a Beam instance explicitly.
+      beamGroups.forEach((group) => {
+        const beamNotes = group.map((idx) => notes[idx]).filter(Boolean);
+        if (beamNotes.length > 1) {
+          new Beam(beamNotes).setContext(context).draw();
+        }
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '未知渲染錯誤';
+      setErrorMessage(`譜例渲染失敗：${message}`);
+    }
   }, [beamGroups, durations, timeSignature]);
 
   return (
@@ -101,6 +108,7 @@ function OptionCard({
     >
       <p className="mb-2 text-sm font-semibold">選項 {label}</p>
       <div ref={containerRef} className="min-h-[150px] overflow-x-auto" />
+      {errorMessage && <p className="mt-2 text-xs text-red-600 dark:text-red-300">{errorMessage}</p>}
     </button>
   );
 }

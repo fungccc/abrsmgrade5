@@ -50,7 +50,7 @@ export function RestQuestionView({ question, selectedOption }: RestQuestionViewP
       }
 
       const [beats, beatValue] = question.timeSignature.split('/').map(Number);
-      const voice = new Voice({ num_beats: beats, beat_value: beatValue });
+      const voice = new Voice({ num_beats: beats, beat_value: beatValue }).setMode(Voice.Mode.SOFT);
       voice.addTickables(notes);
       new Formatter().joinVoices([voice]).format([voice], 600);
       voice.draw(context, stave);
