@@ -125,7 +125,7 @@ export function createContextAssertions(analyzer = new ContextAnalyzer(MOCK_SONG
     {
       id: 'bar7-major-third',
       text: 'The largest melodic interval in the left-hand part of bar 7 is a major 3rd.',
-      answer: analyzer.barHasInterval(7, 'LH', 'M3'),
+      answer: analyzer.largestMelodicIntervalInBar(7, 'LH') === 'M3',
     },
     {
       id: 'highest-note',
@@ -148,13 +148,13 @@ export interface InstrumentSuitabilityQuestion {
 }
 
 const RANGE_WEIGHT: Record<string, number> = {
-  'very-low': 0,
-  low: 1,
-  'mid-low': 2,
-  mid: 3,
-  'mid-high': 4,
-  high: 5,
-  'very-high': 6,
+  'very-low': 43,
+  low: 50,
+  'mid-low': 55,
+  mid: 60,
+  'mid-high': 65,
+  high: 72,
+  'very-high': 79,
 };
 
 export function createInstrumentSuitabilityQuestion(analyzer = new ContextAnalyzer(MOCK_SONG)): InstrumentSuitabilityQuestion {
@@ -166,7 +166,7 @@ export function createInstrumentSuitabilityQuestion(analyzer = new ContextAnalyz
     .map((name) => INSTRUMENT_DATABASE.find((i) => i.name === name))
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
     .map((instrument) => {
-      const centerDistance = Math.abs(RANGE_WEIGHT[instrument.range] - phraseRange.center);
+      const centerDistance = Math.abs(RANGE_WEIGHT[instrument.range] - phraseRange.centerMidi);
       return { instrument: instrument.name, score: centerDistance };
     })
     .sort((a, b) => a.score - b.score);

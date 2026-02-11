@@ -86,6 +86,14 @@ export function ContextViewer({ context }: Props): JSX.Element {
             lower.addClef('bass').addKeySignature('F#m');
           }
 
+          if (bar.RH.crescendo) {
+            upper.setText('cresc.', 3, { shift_y: 70 });
+          }
+          if (bar.RH.diminuendo) {
+            upper.setText('dim.', 3, { shift_y: 82 });
+          }
+
+
           upper.setContext(ctx).draw();
           lower.setContext(ctx).draw();
 
@@ -136,12 +144,6 @@ export function ContextViewer({ context }: Props): JSX.Element {
               .draw();
           }
 
-          if (bar.RH.crescendo) {
-            upper.setText('cresc.', 3, { shift_y: 70 });
-          }
-          if (bar.RH.diminuendo) {
-            upper.setText('dim.', 3, { shift_y: 82 });
-          }
 
           trebleStaves.push(upper);
           bassStaves.push(lower);

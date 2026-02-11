@@ -24,9 +24,39 @@ const LETTER_TO_SEMITONE: Record<string, number> = {
   B: 11,
 };
 
+const CHROMATIC_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
 function pitchClass(pitch: string): string {
   const match = pitch.match(/^([A-G][#b]?)/);
   return match ? match[1] : pitch;
+}
+
+function normalizePitchClass(pc: string): string {
+  const enharmonicMap: Record<string, string> = {
+    Db: 'C#',
+    Eb: 'D#',
+    Gb: 'F#',
+    Ab: 'G#',
+    Bb: 'A#',
+    Fb: 'E',
+    Cb: 'B',
+    E#: 'F',
+    B#: 'C',
+  };
+  return enharmonicMap[pc] ?? pc;
+}
+
+function pitchClassToSemitone(pc: string): number {
+  const normalized = normalizePitchClass(pc);
+  const letter = normalized[0];
+  const accidental = normalized[1] ?? '';
+  const accidentalOffset = accidental === '#' ? 1 : accidental === 'b' ? -1 : 0;
+  return (LETTER_TO_SEMITONE[letter] + accidentalOffset + 12) % 12;
+}
+
+function transposePitchClass(pc: string, semitones: number): string {
+  const root = pitchClassToSemitone(pc);
+  return CHROMATIC_SHARP[(root + semitones + 12) % 12];
 }
 
 function pitchToMidi(pitch: string): number {
@@ -69,10 +99,7 @@ export class ContextAnalyzer {
       const barNumber = idx + 1;
       if (symbolType === 'crescendo' && (bar.RH.crescendo || bar.LH.crescendo)) found.push(barNumber);
       if (symbolType === 'diminuendo' && (bar.RH.diminuendo || bar.LH.diminuendo)) found.push(barNumber);
-      if (
-        symbolType === 'staccato' &&
-        [...bar.RH.notes, ...bar.LH.notes].some((n) => n.articulation === 'staccato')
-      ) {
+      if (symbolType === 'staccato' && [...bar.RH.notes, ...bar.LH.notes].some((n) => n.articulation === 'staccato')) {
         found.push(barNumber);
       }
     });
@@ -87,15 +114,15 @@ export class ContextAnalyzer {
     return { lowest, highest };
   }
 
-  getRangeForBars(startBar: number, endBar: number, hand: Hand): { low: number; high: number; center: number } {
+  getRangeForBars(startBar: number, endBar: number, hand: Hand): { low: number; high: number; centerMidi: number } {
     const notes = this.context.bars
       .slice(startBar - 1, endBar)
       .flatMap((bar) => bar[hand].notes)
       .map((note) => pitchToMidi(note.pitch));
     const low = Math.min(...notes);
     const high = Math.max(...notes);
-    const center = Math.round((low + high) / 2 / 12);
-    return { low, high, center };
+    const centerMidi = Math.round((low + high) / 2);
+    return { low, high, centerMidi };
   }
 
   barHasInterval(barNumber: number, hand: Hand, intervalType: IntervalType): boolean {
@@ -106,6 +133,20 @@ export class ContextAnalyzer {
     return false;
   }
 
+  largestMelodicIntervalInBar(barNumber: number, hand: Hand): IntervalType | null {
+    const notes = this.getNotesInBar(barNumber, hand);
+    let largest: IntervalType | null = null;
+    let maxSemitones = -1;
+    for (let i = 0; i < notes.length - 1; i += 1) {
+      const semitones = Math.abs(pitchToMidi(notes[i + 1].pitch) - pitchToMidi(notes[i].pitch));
+      if (semitones > maxSemitones && SEMITONE_TO_INTERVAL[semitones]) {
+        maxSemitones = semitones;
+        largest = SEMITONE_TO_INTERVAL[semitones];
+      }
+    }
+    return largest;
+  }
+
   beginsLightly(): boolean {
     const first = this.context.bars[0];
     return first.RH.dynamics === 'pp' || first.RH.dynamics === 'p' || first.LH.dynamics === 'pp' || first.LH.dynamics === 'p';
@@ -113,21 +154,26 @@ export class ContextAnalyzer {
 
   endsOnSubdominant(): boolean {
     const keyRoot = this.context.keySignature.split(' ')[0];
-    const subdominant = keyRoot.startsWith('F#') ? ['B', 'D', 'F#'] : ['F', 'A', 'C'];
+    const subdominantRoot = transposePitchClass(keyRoot, 5);
+    const isMinor = this.context.keySignature.toLowerCase().includes('minor');
+    const chordSemitones = isMinor ? [0, 3, 7] : [0, 4, 7];
+    const subdominantTriad = chordSemitones.map((step) => transposePitchClass(subdominantRoot, step));
+
     const lastBar = this.context.bars[this.context.bars.length - 1];
-    const pcs = [...lastBar.RH.notes, ...lastBar.LH.notes].map((n) => pitchClass(n.pitch));
-    return subdominant.every((pc) => pcs.includes(pc));
+    const pcs = [...lastBar.RH.notes, ...lastBar.LH.notes].map((n) => normalizePitchClass(pitchClass(n.pitch)));
+    return subdominantTriad.every((pc) => pcs.includes(pc));
   }
 
   getMediantPitchClass(): string {
-    if (this.context.keySignature.startsWith('F#')) return 'A';
-    return 'E';
+    const keyRoot = this.context.keySignature.split(' ')[0];
+    return transposePitchClass(keyRoot, 3);
   }
 
   countScaleDegreeInHand(targetPitchClass: string, hand: Hand): number {
+    const normalizedTarget = normalizePitchClass(targetPitchClass);
     return this.context.bars
       .flatMap((bar) => bar[hand].notes)
-      .filter((n) => pitchClass(n.pitch) === targetPitchClass).length;
+      .filter((n) => normalizePitchClass(pitchClass(n.pitch)) === normalizedTarget).length;
   }
 
   findMatchingRhythmAndArticulation(barNumber: number, hand: Hand): number[] {
