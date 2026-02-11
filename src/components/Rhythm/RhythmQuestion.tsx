@@ -53,13 +53,21 @@ export function RhythmQuestionView({ question }: RhythmQuestionProps): JSX.Eleme
       voice.draw(context, stave);
 
       const beams: Beam[] = [];
+      const beamedNotes = new Set<StaveNote>();
+
       question.stemGroups.forEach((indexes) => {
         const candidates = indexes
           .map((noteIndex) => staveNotes[noteIndex])
-          .filter((note) => !note.isRest() && note.getDuration().startsWith('8'));
+          .filter((note) => note instanceof StaveNote && !note.isRest() && note.getDuration().startsWith('8'));
+
         if (candidates.length > 1) {
+          candidates.forEach((note) => beamedNotes.add(note));
           beams.push(new Beam(candidates));
         }
+      });
+
+      beamedNotes.forEach((note) => {
+        note.setFlagStyle({ fillStyle: 'transparent', strokeStyle: 'transparent' });
       });
 
       beams.forEach((beam) => beam.setContext(context).draw());
