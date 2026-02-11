@@ -39,8 +39,23 @@ function addModifiers(note: StaveNote, event: NoteEvent): void {
   if (event.articulation === 'accent') note.addModifier(new Articulation('a>').setPosition(3), 0);
 }
 
-function buildNotes(events: NoteEvent[], clef: 'treble' | 'bass'): StaveNote[] {
-  return events.map((event) => {
+
+
+function beatsFromDuration(duration: NoteEvent['duration']): number {
+  if (duration === 'h') return 2;
+  if (duration === 'q') return 1;
+  if (duration === '8') return 0.5;
+  return 0.25;
+}
+
+function restDurationFromRemaining(remaining: number): 'q' | '8' | '16' {
+  if (remaining >= 1) return 'q';
+  if (remaining >= 0.5) return '8';
+  return '16';
+}
+
+function buildNotes(events: NoteEvent[], clef: 'treble' | 'bass', beatsPerBar = 2): StaveNote[] {
+  const notes = events.map((event) => {
     const note = new StaveNote({
       clef,
       keys: [toVexKey(event.pitch)],
@@ -49,6 +64,23 @@ function buildNotes(events: NoteEvent[], clef: 'treble' | 'bass'): StaveNote[] {
     addModifiers(note, event);
     return note;
   });
+
+  const totalBeats = events.reduce((sum, event) => sum + beatsFromDuration(event.duration), 0);
+  let remaining = Math.max(0, beatsPerBar - totalBeats);
+
+  while (remaining > 0.0001) {
+    const restDuration = restDurationFromRemaining(remaining);
+    notes.push(
+      new StaveNote({
+        clef,
+        keys: ['b/4'],
+        duration: `${restDuration}r`,
+      }),
+    );
+    remaining -= beatsFromDuration(restDuration);
+  }
+
+  return notes;
 }
 
 export function ContextViewer({ context }: Props): JSX.Element {
@@ -114,8 +146,8 @@ export function ContextViewer({ context }: Props): JSX.Element {
           const rhNotes = buildNotes(bar.RH.notes, 'treble');
           const lhNotes = buildNotes(bar.LH.notes, 'bass');
 
-          const rhVoice = new Voice({ num_beats: 2, beat_value: 4 }).setStrict(false);
-          const lhVoice = new Voice({ num_beats: 2, beat_value: 4 }).setStrict(false);
+          const rhVoice = new Voice({ num_beats: 2, beat_value: 4 }).setMode(Voice.Mode.SOFT);
+          const lhVoice = new Voice({ num_beats: 2, beat_value: 4 }).setMode(Voice.Mode.SOFT);
           rhVoice.addTickables(rhNotes);
           lhVoice.addTickables(lhNotes);
 
