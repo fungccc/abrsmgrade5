@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Beam, Formatter, Renderer, Stave, StaveNote, Voice } from 'vexflow';
+import { Beam, Dot, Formatter, Renderer, Stave, StaveNote, Voice } from 'vexflow';
 import type { RhythmQuestion } from '../../utils/music-logic/rhythmGenerator';
 
 interface RhythmQuestionProps {
@@ -35,7 +35,7 @@ export function RhythmQuestionView({ question }: RhythmQuestionProps): JSX.Eleme
 
         if (token.dots) {
           for (let i = 0; i < token.dots; i += 1) {
-            note.addDotToAll();
+            note.addModifier(new Dot(), 0);
           }
         }
 
@@ -44,8 +44,8 @@ export function RhythmQuestionView({ question }: RhythmQuestionProps): JSX.Eleme
 
       const [beats, beatValue] = question.timeSignature.split('/').map(Number);
       const voice = new Voice({
-        num_beats: beats,
-        beat_value: beatValue,
+        numBeats: beats,
+        beatValue: beatValue,
       }).setMode(Voice.Mode.SOFT);
       voice.addTickables(staveNotes);
 

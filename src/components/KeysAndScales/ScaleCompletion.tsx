@@ -39,7 +39,7 @@ export function ScaleCompletion({ question, x, y, submitted, onSelectX, onSelect
       return new TextNote({ text: idx === question.missingIndexes[0] ? 'X' : 'Y', duration: 'q', line: 9 });
     });
 
-    const voice = new Voice({ num_beats: notes.length, beat_value: 4 });
+    const voice = new Voice({ numBeats: notes.length, beatValue: 4 });
     voice.addTickables(notes);
     new Formatter().joinVoices([voice]).format([voice], 860);
     voice.draw(ctx, stave);

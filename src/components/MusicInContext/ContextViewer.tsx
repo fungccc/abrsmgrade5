@@ -146,8 +146,8 @@ export function ContextViewer({ context }: Props): JSX.Element {
           const rhNotes = buildNotes(bar.RH.notes, 'treble');
           const lhNotes = buildNotes(bar.LH.notes, 'bass');
 
-          const rhVoice = new Voice({ num_beats: 2, beat_value: 4 }).setMode(Voice.Mode.SOFT);
-          const lhVoice = new Voice({ num_beats: 2, beat_value: 4 }).setMode(Voice.Mode.SOFT);
+          const rhVoice = new Voice({ numBeats: 2, beatValue: 4 }).setMode(Voice.Mode.SOFT);
+          const lhVoice = new Voice({ numBeats: 2, beatValue: 4 }).setMode(Voice.Mode.SOFT);
           rhVoice.addTickables(rhNotes);
           lhVoice.addTickables(lhNotes);
 

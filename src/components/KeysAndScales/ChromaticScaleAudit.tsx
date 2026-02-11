@@ -31,7 +31,7 @@ export function ChromaticScaleAudit({ question, selected, submitted, onSelect }:
       return note;
     });
 
-    const voice = new Voice({ num_beats: notes.length, beat_value: 8 });
+    const voice = new Voice({ numBeats: notes.length, beatValue: 8 });
     voice.addTickables(notes);
     new Formatter().joinVoices([voice]).format([voice], 700);
     voice.draw(ctx, stave);

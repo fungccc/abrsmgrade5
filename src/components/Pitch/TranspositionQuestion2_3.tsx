@@ -26,7 +26,7 @@ function drawBar(container: HTMLDivElement, clef: string, key: string, notesData
     return note;
   });
 
-  const voice = new Voice({ num_beats: 6, beat_value: 8 });
+  const voice = new Voice({ numBeats: 6, beatValue: 8 });
   voice.addTickables(notes);
   new Formatter().joinVoices([voice]).format([voice], 560);
   voice.draw(ctx, stave);

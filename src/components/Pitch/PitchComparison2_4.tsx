@@ -26,7 +26,7 @@ function BarView({ id, clef, note }: { id: string; clef: string; note: string })
     stave.setContext(ctx).draw();
 
     const staveNote = new StaveNote({ keys: [note], duration: 'w', clef });
-    const voice = new Voice({ num_beats: 3, beat_value: 4 });
+    const voice = new Voice({ numBeats: 3, beatValue: 4 });
     voice.addTickables([staveNote]);
     new Formatter().joinVoices([voice]).format([voice], 120);
     voice.draw(ctx, stave);

@@ -24,7 +24,7 @@ export function ClefIdentification({ question, selected, submitted, onSelect }: 
     stave.setContext(ctx).draw();
 
     const notes = question.notes.map((n) => new StaveNote({ keys: [`${n.name[0].toLowerCase()}/4`], duration: '8', clef: 'treble' }));
-    const voice = new Voice({ num_beats: notes.length, beat_value: 8 });
+    const voice = new Voice({ numBeats: notes.length, beatValue: 8 });
     voice.addTickables(notes);
     new Formatter().joinVoices([voice]).format([voice], 760);
     voice.draw(ctx, stave);

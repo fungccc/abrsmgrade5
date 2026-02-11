@@ -34,8 +34,8 @@ export function ChordAnalysis5_3({ question, answers, submitted, onSelect }: Pro
     const topNotes = question.trebleTexture.map((n) => new StaveNote({ keys: [`${n.name[0].toLowerCase()}/5`], duration: '8', clef: 'treble' }));
     const bottomNotes = question.bassTexture.map((n) => new StaveNote({ keys: [`${n.name[0].toLowerCase()}/3`], duration: 'q', clef: 'bass' }));
 
-    const vt = new Voice({ num_beats: topNotes.length, beat_value: 8 }).addTickables(topNotes);
-    const vb = new Voice({ num_beats: bottomNotes.length, beat_value: 4 }).addTickables(bottomNotes);
+    const vt = new Voice({ numBeats: topNotes.length, beatValue: 8 }).addTickables(topNotes);
+    const vb = new Voice({ numBeats: bottomNotes.length, beatValue: 4 }).addTickables(bottomNotes);
 
     new Formatter().joinVoices([vt]).joinVoices([vb]).format([vt], 780).format([vb], 780);
     vt.draw(ctx, top);

@@ -29,7 +29,7 @@ export function PitchQuestion2_2({ question, selected, submitted, onSelect }: Pr
     const acc = PitchLogic.vexAccidental(question.source);
     if (acc) note.addModifier(new Accidental(acc), 0);
 
-    const voice = new Voice({ num_beats: 4, beat_value: 4 });
+    const voice = new Voice({ numBeats: 4, beatValue: 4 });
     voice.addTickables([note]);
     new Formatter().joinVoices([voice]).format([voice], 220);
     voice.draw(ctx, stave);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Formatter, Renderer, Stave, StaveNote, Voice } from 'vexflow';
+import { Dot, Formatter, Renderer, Stave, StaveNote, Voice } from 'vexflow';
 import type { RestAuditQuestion } from '../../utils/music-logic/restAuditGenerator';
 
 interface RestAuditQuestionProps {
@@ -38,13 +38,13 @@ export function RestAuditQuestionView({
       const notes = question.tokens.map((token) => {
         const note = new StaveNote({ keys: ['b/4'], duration: token.vexDuration, clef: 'treble' });
         if (token.dots) {
-          for (let i = 0; i < token.dots; i += 1) note.addDotToAll();
+          for (let i = 0; i < token.dots; i += 1) note.addModifier(new Dot(), 0);
         }
         return note;
       });
 
       const [beats, beatValue] = question.timeSignature.split('/').map(Number);
-      const voice = new Voice({ num_beats: beats, beat_value: beatValue }).setMode(Voice.Mode.SOFT);
+      const voice = new Voice({ numBeats: beats, beatValue: beatValue }).setMode(Voice.Mode.SOFT);
       voice.addTickables(notes);
 
       new Formatter().joinVoices([voice]).format([voice], 620);

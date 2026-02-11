@@ -37,7 +37,7 @@ export function InteractiveIntervalWriter({ question, current, submitted, onMove
     if (a1) chord.addModifier(new Accidental(a1), 0);
     if (a2) chord.addModifier(new Accidental(a2), 1);
 
-    const voice = new Voice({ num_beats: 4, beat_value: 4 });
+    const voice = new Voice({ numBeats: 4, beatValue: 4 });
     voice.addTickables([chord]);
     new Formatter().joinVoices([voice]).format([voice], 220);
     voice.draw(ctx, stave);

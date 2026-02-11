@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Formatter, Renderer, Stave, StaveNote, TextNote, Voice } from 'vexflow';
+import { Dot, Formatter, Renderer, Stave, StaveNote, TextNote, Voice, type Tickable } from 'vexflow';
 import type { RestQuestion, RestQuestionOption } from '../../utils/music-logic/restGenerator';
 
 interface RestQuestionViewProps {
@@ -27,16 +27,16 @@ export function RestQuestionView({ question, selectedOption }: RestQuestionViewP
       stave.addClef('treble').addTimeSignature(question.timeSignature);
       stave.setContext(context).draw();
 
-      const notes: StaveNote[] = question.givenNotes.map((token) => {
+      const notes: Tickable[] = question.givenNotes.map((token) => {
         const note = new StaveNote({ keys: ['b/4'], duration: token.vexDuration, clef: 'treble' });
-        if (token.dots) note.addDotToAll();
+        if (token.dots) note.addModifier(new Dot(), 0);
         return note;
       });
 
       if (selectedOption) {
         selectedOption.rests.forEach((rest) => {
           const r = new StaveNote({ keys: ['b/4'], duration: rest.vexDuration, clef: 'treble' });
-          if (rest.dots) r.addDotToAll();
+          if (rest.dots) r.addModifier(new Dot(), 0);
           notes.push(r);
         });
       } else {
@@ -50,7 +50,7 @@ export function RestQuestionView({ question, selectedOption }: RestQuestionViewP
       }
 
       const [beats, beatValue] = question.timeSignature.split('/').map(Number);
-      const voice = new Voice({ num_beats: beats, beat_value: beatValue }).setMode(Voice.Mode.SOFT);
+      const voice = new Voice({ numBeats: beats, beatValue: beatValue }).setMode(Voice.Mode.SOFT);
       voice.addTickables(notes);
       new Formatter().joinVoices([voice]).format([voice], 600);
       voice.draw(context, stave);

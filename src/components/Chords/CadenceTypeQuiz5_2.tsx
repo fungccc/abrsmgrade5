@@ -36,8 +36,8 @@ export function CadenceTypeQuiz5_2({ question, selected, submitted, onSelect }: 
     const leftBottom = new StaveNote({ keys: question.leftChordBass.map((n) => `${n.name[0].toLowerCase()}/3`), duration: 'h', clef: 'bass' });
     const rightBottom = new StaveNote({ keys: question.rightChordBass.map((n) => `${n.name[0].toLowerCase()}/3`), duration: 'h', clef: 'bass' });
 
-    const vTop = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([leftTop, rightTop]);
-    const vBottom = new Voice({ num_beats: 4, beat_value: 4 }).addTickables([leftBottom, rightBottom]);
+    const vTop = new Voice({ numBeats: 4, beatValue: 4 }).addTickables([leftTop, rightTop]);
+    const vBottom = new Voice({ numBeats: 4, beatValue: 4 }).addTickables([leftBottom, rightBottom]);
 
     new Formatter().joinVoices([vTop]).joinVoices([vBottom]).formatToStave([vTop], top).formatToStave([vBottom], bottom);
     vTop.draw(ctx, top);

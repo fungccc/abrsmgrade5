@@ -88,7 +88,7 @@ function OptionCard({
       });
 
       const [beats, beatValue] = timeSignature.split('/').map(Number);
-      const voice = new Voice({ num_beats: beats, beat_value: beatValue }).setMode(Voice.Mode.SOFT);
+      const voice = new Voice({ numBeats: beats, beatValue: beatValue }).setMode(Voice.Mode.SOFT);
       voice.addTickables(notes);
 
       new Formatter().joinVoices([voice]).format([voice], 240);

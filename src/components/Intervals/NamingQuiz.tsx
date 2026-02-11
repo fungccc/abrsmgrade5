@@ -37,7 +37,7 @@ export function NamingQuiz({ question, selected, submitted, onSelect }: Props): 
     if (lowAcc) chord.addModifier(new Accidental(lowAcc), 0);
     if (highAcc) chord.addModifier(new Accidental(highAcc), 1);
 
-    const voice = new Voice({ num_beats: 4, beat_value: 4 });
+    const voice = new Voice({ numBeats: 4, beatValue: 4 });
     voice.addTickables([chord]);
     new Formatter().joinVoices([voice]).format([voice], 180);
     voice.draw(ctx, stave);

@@ -243,7 +243,7 @@ function HomePage(): JSX.Element {
         <p className="text-sm text-stone-600 dark:text-stone-300">Section 1 Rhythm / Section 2 Pitch / Section 3 Keys and Scales / Section 4 Intervals / Section 5 Chords / Section 6 Terms, Signs, Instruments / Section 7 Music in Context</p>
       </header>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button type="button" onClick={() => setChapter('rhythm')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'rhythm' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
           Section 1: Rhythm
         </button>

@@ -20,7 +20,7 @@ function drawSingle(container: HTMLDivElement, clef: string, noteKey: string, ac
   stave.setContext(ctx).draw();
   const note = new StaveNote({ keys: [noteKey], duration: 'w', clef });
   if (accidental) note.addModifier(new Accidental(accidental), 0);
-  const voice = new Voice({ num_beats: 4, beat_value: 4 });
+  const voice = new Voice({ numBeats: 4, beatValue: 4 });
   voice.addTickables([note]);
   new Formatter().joinVoices([voice]).format([voice], 120);
   voice.draw(ctx, stave);

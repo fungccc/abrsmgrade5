@@ -28,7 +28,7 @@ export function TechnicalNames({ question, selected, submitted, onSelect }: Prop
     const acc = question.shownNote.name.slice(1);
     if (acc) note.addModifier(new Accidental(acc === 'x' ? '##' : acc), 0);
 
-    const voice = new Voice({ num_beats: 4, beat_value: 4 });
+    const voice = new Voice({ numBeats: 4, beatValue: 4 });
     voice.addTickables([note]);
     new Formatter().joinVoices([voice]).format([voice], 160);
     voice.draw(ctx, stave);
