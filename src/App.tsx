@@ -24,6 +24,17 @@ type SectionMode = '1.1' | '1.2' | '1.3' | '1.4' | '1.5' | 'mixed';
 type QuestionKind = 'time-signature' | 'rest' | 'beaming' | 'advanced-beaming' | 'rest-audit';
 type Chapter = 'rhythm' | 'pitch' | 'keys' | 'intervals' | 'chords' | 'language' | 'context';
 
+
+const CHAPTER_TABS: { id: Chapter; buttonLabel: string; summaryLabel: string }[] = [
+  { id: 'rhythm', buttonLabel: 'Section 1: Rhythm', summaryLabel: 'Section 1 Rhythm' },
+  { id: 'pitch', buttonLabel: 'Section 2: Pitch', summaryLabel: 'Section 2 Pitch' },
+  { id: 'keys', buttonLabel: 'Section 3: Keys & Scales', summaryLabel: 'Section 3 Keys and Scales' },
+  { id: 'intervals', buttonLabel: 'Section 4: Intervals', summaryLabel: 'Section 4 Intervals' },
+  { id: 'chords', buttonLabel: 'Section 5: Chords', summaryLabel: 'Section 5 Chords' },
+  { id: 'language', buttonLabel: 'Section 6: Terms, Signs, Instruments', summaryLabel: 'Section 6 Terms, Signs, Instruments' },
+  { id: 'context', buttonLabel: 'Section 7: Music in Context', summaryLabel: 'Section 7 Music in Context' },
+];
+
 function RhythmSection(): JSX.Element {
   const [mode, setMode] = useState<SectionMode>('1.1');
   const [mixedType, setMixedType] = useState<QuestionKind>('time-signature');
@@ -240,31 +251,20 @@ function HomePage(): JSX.Element {
     <main className="mx-auto min-h-screen max-w-6xl space-y-6 px-4 py-8 text-stone-800 dark:text-stone-100 md:px-6">
       <header className="space-y-2 border-b border-stone-300 pb-4 dark:border-stone-700">
         <h1 className="text-3xl font-bold tracking-tight">ABRSM 五級樂理｜Infinite Question Generator</h1>
-        <p className="text-sm text-stone-600 dark:text-stone-300">Section 1 Rhythm / Section 2 Pitch / Section 3 Keys and Scales / Section 4 Intervals / Section 5 Chords / Section 6 Terms, Signs, Instruments / Section 7 Music in Context</p>
+        <p className="text-sm text-stone-600 dark:text-stone-300">{CHAPTER_TABS.map((tab) => tab.summaryLabel).join(' / ')}</p>
       </header>
 
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => setChapter('rhythm')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'rhythm' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 1: Rhythm
-        </button>
-        <button type="button" onClick={() => setChapter('pitch')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'pitch' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 2: Pitch
-        </button>
-        <button type="button" onClick={() => setChapter('keys')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'keys' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 3: Keys & Scales
-        </button>
-        <button type="button" onClick={() => setChapter('intervals')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'intervals' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 4: Intervals
-        </button>
-        <button type="button" onClick={() => setChapter('chords')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'chords' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 5: Chords
-        </button>
-        <button type="button" onClick={() => setChapter('language')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'language' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 6: Terms, Signs, Instruments
-        </button>
-        <button type="button" onClick={() => setChapter('context')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'context' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
-          Section 7: Music in Context
-        </button>
+        {CHAPTER_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setChapter(tab.id)}
+            className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === tab.id ? 'bg-stone-900 text-white' : 'bg-white'}`}
+          >
+            {tab.buttonLabel}
+          </button>
+        ))}
       </div>
 
       <SectionErrorBoundary key={chapter} sectionName={getChapterTitle(chapter)}>
