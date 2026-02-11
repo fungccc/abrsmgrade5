@@ -16,11 +16,12 @@ import { useRestAuditQuestion } from './hooks/useRestAuditQuestion';
 import { useRestQuestion } from './hooks/useRestQuestion';
 import { useRhythmQuestion } from './hooks/useRhythmQuestion';
 import { MusicInContextSection } from './components/MusicInContext/MusicInContextSection';
+import { MusicLanguageSection } from './components/MusicLanguageSection';
 import type { TimeSignatureId } from './utils/music-logic/rhythmGenerator';
 
 type SectionMode = '1.1' | '1.2' | '1.3' | '1.4' | '1.5' | 'mixed';
 type QuestionKind = 'time-signature' | 'rest' | 'beaming' | 'advanced-beaming' | 'rest-audit';
-type Chapter = 'rhythm' | 'pitch' | 'keys' | 'intervals' | 'chords' | 'context';
+type Chapter = 'rhythm' | 'pitch' | 'keys' | 'intervals' | 'chords' | 'language' | 'context';
 
 function RhythmSection(): JSX.Element {
   const [mode, setMode] = useState<SectionMode>('1.1');
@@ -227,7 +228,7 @@ function HomePage(): JSX.Element {
     <main className="mx-auto min-h-screen max-w-6xl space-y-6 px-4 py-8 text-stone-800 dark:text-stone-100 md:px-6">
       <header className="space-y-2 border-b border-stone-300 pb-4 dark:border-stone-700">
         <h1 className="text-3xl font-bold tracking-tight">ABRSM 五級樂理｜Infinite Question Generator</h1>
-        <p className="text-sm text-stone-600 dark:text-stone-300">Section 1 Rhythm / Section 2 Pitch / Section 3 Keys and Scales / Section 4 Intervals / Section 5 Chords / Section 7 Music in Context</p>
+        <p className="text-sm text-stone-600 dark:text-stone-300">Section 1 Rhythm / Section 2 Pitch / Section 3 Keys and Scales / Section 4 Intervals / Section 5 Chords / Section 6 Terms, Signs, Instruments / Section 7 Music in Context</p>
       </header>
 
       <div className="flex gap-2">
@@ -246,12 +247,15 @@ function HomePage(): JSX.Element {
         <button type="button" onClick={() => setChapter('chords')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'chords' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
           Section 5: Chords
         </button>
+        <button type="button" onClick={() => setChapter('language')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'language' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
+          Section 6: Terms, Signs, Instruments
+        </button>
         <button type="button" onClick={() => setChapter('context')} className={`rounded-lg border px-3 py-2 text-sm font-semibold ${chapter === 'context' ? 'bg-stone-900 text-white' : 'bg-white'}`}>
           Section 7: Music in Context
         </button>
       </div>
 
-      {chapter === 'rhythm' ? <RhythmSection /> : chapter === 'pitch' ? <PitchSection /> : chapter === 'keys' ? <KeysAndScalesSection /> : chapter === 'intervals' ? <IntervalsSection /> : chapter === 'chords' ? <ChordsSection /> : <MusicInContextSection />}
+      {chapter === 'rhythm' ? <RhythmSection /> : chapter === 'pitch' ? <PitchSection /> : chapter === 'keys' ? <KeysAndScalesSection /> : chapter === 'intervals' ? <IntervalsSection /> : chapter === 'chords' ? <ChordsSection /> : chapter === 'language' ? <MusicLanguageSection /> : <MusicInContextSection />}
     </main>
   );
 }
