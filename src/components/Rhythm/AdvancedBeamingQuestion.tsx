@@ -67,6 +67,14 @@ function AdvancedOptionCard({
       stave.setContext(context).draw();
 
       const notes = durations.map((duration) => new StaveNote({ keys: ['b/4'], duration, clef: 'treble' }));
+      const beamedIndexes = new Set(beamGroups.flatMap((group) => group));
+      beamedIndexes.forEach((idx) => {
+        const n = notes[idx];
+        if (n) {
+          n.setFlagStyle({ fillStyle: 'transparent', strokeStyle: 'transparent' });
+        }
+      });
+
       const [beats, beatValue] = timeSignature.split('/').map(Number);
       const voice = new Voice({ num_beats: beats, beat_value: beatValue }).setMode(Voice.Mode.SOFT);
 
